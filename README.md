@@ -18,7 +18,7 @@ Here is an example:
 
 ```Lua
 ChatCmdBuilder.new("admin", function(cmd)
-	cmd:sub("kill :name", function(name, pos)
+	cmd:sub("kill :name", function(name)
 		local player = minetest.get_player_by_name(name)
 		if player then
 			player:set_hp(0)

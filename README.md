@@ -64,7 +64,7 @@ A route is a string. Let's look at `move :name to :pos:pos`:
 * `number` - Any number, including decimals
 * `int` - Any integer, no decimals
 * `text` - Any string
-* `pos` - 1,2,3 or 1.1,2,3.4567
+* `pos` - 1,2,3 or 1.1,2,3.4567 or (1,2,3) or 1.2, 2 ,3.2
 
 ## Build chat command function
 

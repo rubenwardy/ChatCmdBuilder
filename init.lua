@@ -56,7 +56,7 @@ function ChatCmdBuilder.build(func)
 				print("   - Found param " .. param .. " type " .. param_type)
 
 				if param_type == "pos" then
-					sub.pattern = sub.pattern .. "([%d.]+),([%d.]+),([%d.]+)"
+					sub.pattern = sub.pattern .. "%(? *([%d.]+) *, *([%d.]+) *, *([%d.]+) *%)?"
 				elseif param_type == "text" then
 					sub.pattern = sub.pattern .. "(*+)"
 					should_be_eos = true
@@ -182,8 +182,23 @@ local function run_tests()
 	if not move("singleplayer", "move singleplayer to 0,1,2") then
 		error("Test 2 failed")
 	end
-	if move("singleplayer", "move singleplayer to abc def sdosd") then
+	if not move("singleplayer", "move singleplayer to (0,1,2)") then
 		error("Test 3 failed")
+	end
+	if not move("singleplayer", "move singleplayer to 0, 1,2") then
+		error("Test 4 failed")
+	end
+	if not move("singleplayer", "move singleplayer to 0 ,1, 2") then
+		error("Test 5 failed")
+	end
+	if not move("singleplayer", "move singleplayer to 0, 1, 2") then
+		error("Test 6 failed")
+	end
+	if not move("singleplayer", "move singleplayer to 0 ,1 ,2") then
+		error("Test 7 failed")
+	end
+	if move("singleplayer", "move singleplayer to abc def sdosd") then
+		error("Test 8 failed")
 	end
 
 	if not (ChatCmdBuilder.build(function(cmd)
@@ -193,7 +208,7 @@ local function run_tests()
 			end
 		end)
 	end))("singleplayer", "does 1 plus 2 equal 3") then
-		error("Test 4 failed")
+		error("Test 9 failed")
 	end
 end
 if not minetest then

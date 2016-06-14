@@ -47,7 +47,7 @@ end, {
 ```
 
 A player could then do `/admin kill player1` to kill player1,
-or `/admin move player1 0,0,0` to teleport a user.
+or `/admin move player1 to 0,0,0` to teleport a user.
 
 ## Introduction to Routing
 

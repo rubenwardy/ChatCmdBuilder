@@ -197,6 +197,12 @@ local function run_tests()
 	if not move("singleplayer", "move singleplayer to 0 ,1 ,2") then
 		error("Test 7 failed")
 	end
+	if not move("singleplayer", "move singleplayer to ( 0 ,1 ,2)") then
+		error("Test 7 failed")
+	end
+	if move("singleplayer", "move singleplayer to abc,def,sdosd") then
+		error("Test 8 failed")
+	end
 	if move("singleplayer", "move singleplayer to abc def sdosd") then
 		error("Test 8 failed")
 	end

@@ -135,7 +135,7 @@ function ChatCmdBuilder.build(func)
 			local res = { string.match(param, sub.pattern) }
 			if res then
 				local pointer = 1
-				local params = {}
+				local params = { name }
 				for j = 1, #sub.params do
 					local param = sub.params[j]
 					if param == "pos" then
@@ -163,8 +163,8 @@ end
 
 local function run_tests()
 	if not (ChatCmdBuilder.build(function(cmd)
-		cmd:sub("bar :one and :two:word", function(one, two)
-			if one == "abc" and two == "def" then
+		cmd:sub("bar :one and :two:word", function(name, one, two)
+			if name == "singleplayer" and one == "abc" and two == "def" then
 				return true
 			end
 		end)
@@ -173,43 +173,44 @@ local function run_tests()
 	end
 
 	local move = ChatCmdBuilder.build(function(cmd)
-		cmd:sub("move :name to :pos:pos", function(name, pos)
-			if name == "singleplayer" and pos.x == 0 and pos.y == 1 and pos.z == 2 then
+		cmd:sub("move :target to :pos:pos", function(name, target, pos)
+			if name == "singleplayer" and target == "player1" and
+					pos.x == 0 and pos.y == 1 and pos.z == 2 then
 				return true
 			end
 		end)
 	end)
-	if not move("singleplayer", "move singleplayer to 0,1,2") then
+	if not move("singleplayer", "move player1 to 0,1,2") then
 		error("Test 2 failed")
 	end
-	if not move("singleplayer", "move singleplayer to (0,1,2)") then
+	if not move("singleplayer", "move player1 to (0,1,2)") then
 		error("Test 3 failed")
 	end
-	if not move("singleplayer", "move singleplayer to 0, 1,2") then
+	if not move("singleplayer", "move player1 to 0, 1,2") then
 		error("Test 4 failed")
 	end
-	if not move("singleplayer", "move singleplayer to 0 ,1, 2") then
+	if not move("singleplayer", "move player1 to 0 ,1, 2") then
 		error("Test 5 failed")
 	end
-	if not move("singleplayer", "move singleplayer to 0, 1, 2") then
+	if not move("singleplayer", "move player1 to 0, 1, 2") then
 		error("Test 6 failed")
 	end
-	if not move("singleplayer", "move singleplayer to 0 ,1 ,2") then
+	if not move("singleplayer", "move player1 to 0 ,1 ,2") then
 		error("Test 7 failed")
 	end
-	if not move("singleplayer", "move singleplayer to ( 0 ,1 ,2)") then
+	if not move("singleplayer", "move player1 to ( 0 ,1 ,2)") then
 		error("Test 7 failed")
 	end
-	if move("singleplayer", "move singleplayer to abc,def,sdosd") then
+	if move("singleplayer", "move player1 to abc,def,sdosd") then
 		error("Test 8 failed")
 	end
-	if move("singleplayer", "move singleplayer to abc def sdosd") then
+	if move("singleplayer", "move player1 to abc def sdosd") then
 		error("Test 8 failed")
 	end
 
 	if not (ChatCmdBuilder.build(function(cmd)
-		cmd:sub("does :one:int plus :two:int equal :three:int", function(one, two, three)
-			if one + two == three then
+		cmd:sub("does :one:int plus :two:int equal :three:int", function(name, one, two, three)
+			if name == "singleplayer" and one + two == three then
 				return true
 			end
 		end)

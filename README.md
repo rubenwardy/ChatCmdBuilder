@@ -18,23 +18,23 @@ Here is an example:
 
 ```Lua
 ChatCmdBuilder.new("admin", function(cmd)
-	cmd:sub("kill :name", function(name)
-		local player = minetest.get_player_by_name(name)
+	cmd:sub("kill :target", function(name, target)
+		local player = minetest.get_player_by_name(target)
 		if player then
 			player:set_hp(0)
-			return true, "Killed " .. name
+			return true, "Killed " .. target
 		else
-			return false, "Unable to find " .. name
+			return false, "Unable to find " .. target
 		end
 	end)
 
-	cmd:sub("move :name to :pos:pos", function(name, pos)
-		local player = minetest.get_player_by_name(name)
+	cmd:sub("move :target to :pos:pos", function(name, target, pos)
+		local player = minetest.get_player_by_name(target)
 		if player then
 			player:setpos(pos)
-			return true, "Moved " .. name .. " to " .. minetest.pos_to_string(pos)
+			return true, "Moved " .. target .. " to " .. minetest.pos_to_string(pos)
 		else
-			return false, "Unable to find " .. name
+			return false, "Unable to find " .. target
 		end
 	end)
 end, {
@@ -51,11 +51,11 @@ or `/admin move player1 to 0,0,0` to teleport a user.
 
 ## Introduction to Routing
 
-A route is a string. Let's look at `move :name to :pos:pos`:
+A route is a string. Let's look at `move :target to :pos:pos`:
 
 * `move` and `to` are constants. They need to be there in order to match.
-* `:name` and `:pos:pos` are parameters. They're passed to the function.
-* The second `pos` in `:pos:pos` after `:` is the param type. `:name` has an implicit
+* `:target` and `:pos:pos` are parameters. They're passed to the function.
+* The second `pos` in `:pos:pos` after `:` is the param type. `:target` has an implicit
   type of `word`.
 
 ## Param Types

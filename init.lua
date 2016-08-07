@@ -129,7 +129,9 @@ function ChatCmdBuilder.build(func)
 		table.insert(self._subs, sub)
 	end
 
-	func(cmd)
+	if func then
+		func(cmd)
+	end
 
 	cmd.run = function(name, param)
 		print("Running <" .. name .. "> CMD " .. param)

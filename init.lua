@@ -2,8 +2,11 @@ local ChatCmdBuilder = {}
 
 function ChatCmdBuilder.new(name, func, def)
 	def = def or {}
-	def.func = ChatCmdBuilder.build(name, func)
+	local cmd = ChatCmdBuilder.build(name, func)
+	cmd.def = def
+	def.func = cmd.run
 	minetest.register_chatcommand(name, def)
+	return cmd
 end
 
 local STATE_READY = 1
@@ -128,7 +131,7 @@ function ChatCmdBuilder.build(func)
 
 	func(cmd)
 
-	return (function(name, param)
+	cmd.run = function(name, param)
 		print("Running <" .. name .. "> CMD " .. param)
 		for i = 1, #cmd._subs do
 			local sub = cmd._subs[i]
@@ -158,7 +161,9 @@ function ChatCmdBuilder.build(func)
 			end
 		end
 		print("No matches")
-	end)
+	end
+	
+	return cmd
 end
 
 local function run_tests()

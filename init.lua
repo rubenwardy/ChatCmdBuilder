@@ -1,4 +1,4 @@
-local ChatCmdBuilder = {}
+ChatCmdBuilder = {}
 
 function ChatCmdBuilder.new(name, func, def)
 	def = def or {}

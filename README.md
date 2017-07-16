@@ -2,7 +2,7 @@
 
 Easily create complex chat commands with no regex.  
 Created by rubenwardy  
-License: CC0
+License: MIT
 
 # Usage
 

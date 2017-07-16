@@ -134,11 +134,10 @@ function ChatCmdBuilder.build(func)
 	end
 
 	cmd.run = function(name, param)
-		print("Running <" .. name .. "> CMD " .. param)
 		for i = 1, #cmd._subs do
 			local sub = cmd._subs[i]
 			local res = { string.match(param, sub.pattern) }
-			if res then
+			if #res > 0 then
 				local pointer = 1
 				local params = { name }
 				for j = 1, #sub.params do

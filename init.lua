@@ -2,7 +2,7 @@ ChatCmdBuilder = {}
 
 function ChatCmdBuilder.new(name, func, def)
 	def = def or {}
-	local cmd = ChatCmdBuilder.build(name, func)
+	local cmd = ChatCmdBuilder.build(func)
 	cmd.def = def
 	def.func = cmd.run
 	minetest.register_chatcommand(name, def)
@@ -164,7 +164,7 @@ function ChatCmdBuilder.build(func)
 		end
 		print("No matches")
 	end
-	
+
 	return cmd
 end
 

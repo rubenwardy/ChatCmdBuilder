@@ -124,6 +124,7 @@ function ChatCmdBuilder.build(func)
 		end
 		print(" - End of route")
 		finishParam()
+		sub.pattern = sub.pattern .. "$"
 		print("Pattern: " .. sub.pattern)
 
 		table.insert(self._subs, sub)

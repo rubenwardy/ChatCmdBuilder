@@ -59,7 +59,7 @@ function ChatCmdBuilder.build(func)
 				print("   - Found param " .. param .. " type " .. param_type)
 
 				if param_type == "pos" then
-					sub.pattern = sub.pattern .. "%(? *([%d.]+) *, *([%d.]+) *, *([%d.]+) *%)?"
+					sub.pattern = sub.pattern .. "%(? *(%-?[%d.]+) *, *(%-?[%d.]+) *, *(%-?[%d.]+) *%)?"
 				elseif param_type == "text" then
 					sub.pattern = sub.pattern .. "(*+)"
 					should_be_eos = true

@@ -61,12 +61,12 @@ function ChatCmdBuilder.build(func)
 				if param_type == "pos" then
 					sub.pattern = sub.pattern .. "%(? *(%-?[%d.]+) *, *(%-?[%d.]+) *, *(%-?[%d.]+) *%)?"
 				elseif param_type == "text" then
-					sub.pattern = sub.pattern .. "(*+)"
+					sub.pattern = sub.pattern .. "(.+)"
 					should_be_eos = true
 				elseif param_type == "number" then
-					sub.pattern = sub.pattern .. "([%d.]+)"
+					sub.pattern = sub.pattern .. "(%-?[%d.]+)"
 				elseif param_type == "int" then
-					sub.pattern = sub.pattern .. "([%d]+)"
+					sub.pattern = sub.pattern .. "(%-?[%d]+)"
 				else
 					if param_type ~= "word" then
 						print("Unrecognised param_type=" .. param_type .. ", using 'word' type instead")
@@ -159,7 +159,13 @@ function ChatCmdBuilder.build(func)
 						pointer = pointer + 1
 					end
 				end
-				return sub.func(unpack(params))
+				if table.unpack then
+					-- lua 5.2 or later
+					return sub.func(table.unpack(params))
+				else
+					-- lua 5.1 or earlier
+					return sub.func(unpack(params))
+				end
 			end
 		end
 		print("No matches")
@@ -175,7 +181,7 @@ local function run_tests()
 				return true
 			end
 		end)
-	end))("singleplayer", "bar abc and def") then
+	end)).run("singleplayer", "bar abc and def") then
 		error("Test 1 failed")
 	end
 
@@ -186,7 +192,7 @@ local function run_tests()
 				return true
 			end
 		end)
-	end)
+	end).run
 	if not move("singleplayer", "move player1 to 0,1,2") then
 		error("Test 2 failed")
 	end
@@ -206,13 +212,13 @@ local function run_tests()
 		error("Test 7 failed")
 	end
 	if not move("singleplayer", "move player1 to ( 0 ,1 ,2)") then
-		error("Test 7 failed")
+		error("Test 8 failed")
 	end
 	if move("singleplayer", "move player1 to abc,def,sdosd") then
-		error("Test 8 failed")
+		error("Test 9 failed")
 	end
 	if move("singleplayer", "move player1 to abc def sdosd") then
-		error("Test 8 failed")
+		error("Test 10 failed")
 	end
 
 	if not (ChatCmdBuilder.build(function(cmd)
@@ -221,9 +227,51 @@ local function run_tests()
 				return true
 			end
 		end)
-	end))("singleplayer", "does 1 plus 2 equal 3") then
-		error("Test 9 failed")
+	end)).run("singleplayer", "does 1 plus 2 equal 3") then
+		error("Test 11 failed")
 	end
+
+	local checknegint = ChatCmdBuilder.build(function(cmd)
+		cmd:sub("checknegint :x:int", function(name, x)
+			return x
+		end)
+	end).run
+	if checknegint("checker","checknegint -2") ~= -2 then
+		error("Test 12 failed")
+	end
+	
+	local checknegnumber = ChatCmdBuilder.build(function(cmd)
+		cmd:sub("checknegnumber :x:number", function(name, x)
+			return x
+		end)
+	end).run
+	if checknegnumber("checker","checknegnumber -3.3") ~= -3.3 then
+		error("Test 13 failed")
+	end
+	
+	local checknegpos = ChatCmdBuilder.build(function(cmd)
+		cmd:sub("checknegpos :pos:pos", function(name, pos)
+			return pos
+		end)
+	end).run
+	local negpos = checknegpos("checker","checknegpos (-13.3,-4.6,-1234.5)")
+	if negpos.x ~= -13.3 or negpos.y ~= -4.6 or negpos.z ~= -1234.5 then
+		error("Test 14 failed")
+	end
+	
+	local checktypes = ChatCmdBuilder.build(function(cmd)
+		cmd:sub("checktypes :int:int :number:number :pos:pos :word:word :text:text", function(name, int, number, pos, word, text)
+			return int, number, pos.x, pos.y, pos.z, word, text
+		end)
+	end).run
+	local int, number, posx, posy, posz, word, text = checktypes
+	int, number, posx, posy, posz, word, text = checktypes("checker","checktypes -1 -2.4 (-3,-5.3,6.12) some text to finish off with")
+	--print(int, number, posx, posy, posz, word, text)
+	if int ~= -1 or number ~= -2.4 or posx ~= -3 or posy ~= -5.3 or posz ~= 6.12 or word ~= "some" or text ~= "text to finish off with" then
+		error("Test 15 failed")
+	end
+	print("All tests passed")
+	
 end
 if not minetest then
 	run_tests()

@@ -168,7 +168,7 @@ function ChatCmdBuilder.build(func)
 				end
 			end
 		end
-		dprint("No matches")
+		return false, "Invalid command"
 	end
 
 	return cmd

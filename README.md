@@ -66,6 +66,12 @@ A route is a string. Let's look at `move :target to :pos:pos`:
 * `text` - Any string
 * `pos` - 1,2,3 or 1.1,2,3.4567 or (1,2,3) or 1.2, 2 ,3.2
 
+## Registering new Paramtypes
+
+```lua
+ChatCmdBuilder.types["lower"] = "([a-z])"
+```
+
 ## Build chat command function
 
 If you don't want to register the chatcommand at this point, you can just generate

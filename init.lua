@@ -84,6 +84,9 @@ function ChatCmdBuilder.build(func)
 
 		-- Iterate through the route to find params
 		local state = STATE_READY
+		local catching_space = false
+		local match_space = " " -- change to "%s" to also catch tabs and newlines
+		local catch_space = match_space.."+" 
 		for i = 1, #route do
 			local c = route:sub(i, i)
 			if should_be_eos then
@@ -95,7 +98,15 @@ function ChatCmdBuilder.build(func)
 					dprint(" - Found :, entering param")
 					state = STATE_PARAM
 					param_type = "word"
+					catching_space = false
+				elseif c:match(match_space) then
+					print(" - Found space")
+					if not catching_space then
+						catching_space = true
+						sub.pattern = sub.pattern .. catch_space
+					end
 				else
+					catching_space = false
 					sub.pattern = sub.pattern .. escape(c)
 				end
 			elseif state == STATE_PARAM then
@@ -103,6 +114,12 @@ function ChatCmdBuilder.build(func)
 					dprint(" - Found :, entering param type")
 					state = STATE_PARAM_TYPE
 					param_type = ""
+				elseif c:match(match_space) then
+					print(" - Found whitespace, leaving param")
+					state = STATE_READY
+					finishParam()
+					catching_space = true
+					sub.pattern = sub.pattern .. catch_space
 				elseif c:match("%W") then
 					dprint(" - Found nonalphanum, leaving param")
 					state = STATE_READY
@@ -112,7 +129,13 @@ function ChatCmdBuilder.build(func)
 					param = param .. c
 				end
 			elseif state == STATE_PARAM_TYPE then
-				if c:match("%W") then
+				if c:match(match_space) then
+					print(" - Found space, leaving param type")
+					state = STATE_READY
+					finishParam()
+					catching_space = true
+					sub.pattern = sub.pattern .. catch_space					
+				elseif c:match("%W") then
 					dprint(" - Found nonalphanum, leaving param type")
 					state = STATE_READY
 					finishParam()
@@ -260,14 +283,14 @@ local function run_tests()
 	end
 
 	local checktypes = ChatCmdBuilder.build(function(cmd)
-		cmd:sub("checktypes :int:int :number:number :pos:pos :word:word :text:text", function(name, int, number, pos, word, text)
+		cmd:sub("checktypes :int:int :number:number  :pos:pos :word:word  :text:text", function(name, int, number, pos, word, text)
 			return int, number, pos.x, pos.y, pos.z, word, text
 		end)
 	end).run
-	local int, number, posx, posy, posz, word, text = checktypes
-	int, number, posx, posy, posz, word, text = checktypes("checker","checktypes -1 -2.4 (-3,-5.3,6.12) some text to finish off with")
+	local int, number, posx, posy, posz, word, text
+	int, number, posx, posy, posz, word, text = checktypes("checker","checktypes -1 -2.4 (-3,-5.3,6.12)  some text  to finish off with")
 	--dprint(int, number, posx, posy, posz, word, text)
-	if int ~= -1 or number ~= -2.4 or posx ~= -3 or posy ~= -5.3 or posz ~= 6.12 or word ~= "some" or text ~= "text to finish off with" then
+	if int ~= -1 or number ~= -2.4 or posx ~= -3 or posy ~= -5.3 or posz ~= 6.12 or word ~= "some" or text ~= "text  to finish off with" then
 		error("Test 15 failed")
 	end
 	dprint("All tests passed")

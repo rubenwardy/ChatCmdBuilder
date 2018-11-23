@@ -32,12 +32,22 @@ local function escape(char)
 	end
 end
 
+local dprint = function() end
+
+ChatCmdBuilder.types = {
+	pos    = "%(? *(%-?[%d.]+) *, *(%-?[%d.]+) *, *(%-?[%d.]+) *%)?",
+	text   = "(.+)",
+	number = "(%-?[%d.]+)",
+	int    = "(%-?[%d]+)",
+	word   = "([^ ]+)",
+}
+
 function ChatCmdBuilder.build(func)
 	local cmd = {
 		_subs = {}
 	}
 	function cmd:sub(route, func, def)
-		print("Parsing " .. route)
+		dprint("Parsing " .. route)
 
 		def = def or {}
 		if string.trim then
@@ -56,24 +66,14 @@ function ChatCmdBuilder.build(func)
 		local should_be_eos = false
 		local function finishParam()
 			if param ~= "" and param_type ~= "" then
-				print("   - Found param " .. param .. " type " .. param_type)
+				dprint("   - Found param " .. param .. " type " .. param_type)
 
-				if param_type == "pos" then
-					sub.pattern = sub.pattern .. "%(? *(%-?[%d.]+) *, *(%-?[%d.]+) *, *(%-?[%d.]+) *%)?"
-				elseif param_type == "text" then
-					sub.pattern = sub.pattern .. "(.+)"
-					should_be_eos = true
-				elseif param_type == "number" then
-					sub.pattern = sub.pattern .. "(%-?[%d.]+)"
-				elseif param_type == "int" then
-					sub.pattern = sub.pattern .. "(%-?[%d]+)"
-				else
-					if param_type ~= "word" then
-						print("Unrecognised param_type=" .. param_type .. ", using 'word' type instead")
-						param_type = "word"
-					end
-					sub.pattern = sub.pattern .. "([^ ]+)"
+				local pattern = ChatCmdBuilder.types[param_type]
+				if not pattern then
+					error("Unrecognised param_type=" .. param_type)
 				end
+
+				sub.pattern = sub.pattern .. pattern
 
 				table.insert(sub.params, param_type)
 
@@ -95,7 +95,7 @@ function ChatCmdBuilder.build(func)
 
 			if state == STATE_READY then
 				if c == ":" then
-					print(" - Found :, entering param")
+					dprint(" - Found :, entering param")
 					state = STATE_PARAM
 					param_type = "word"
 					catching_space = false
@@ -111,7 +111,7 @@ function ChatCmdBuilder.build(func)
 				end
 			elseif state == STATE_PARAM then
 				if c == ":" then
-					print(" - Found :, entering param type")
+					dprint(" - Found :, entering param type")
 					state = STATE_PARAM_TYPE
 					param_type = ""
 				elseif c:match(match_space) then
@@ -121,7 +121,7 @@ function ChatCmdBuilder.build(func)
 					catching_space = true
 					sub.pattern = sub.pattern .. catch_space
 				elseif c:match("%W") then
-					print(" - Found nonalphanum, leaving param")
+					dprint(" - Found nonalphanum, leaving param")
 					state = STATE_READY
 					finishParam()
 					sub.pattern = sub.pattern .. escape(c)
@@ -136,7 +136,7 @@ function ChatCmdBuilder.build(func)
 					catching_space = true
 					sub.pattern = sub.pattern .. catch_space					
 				elseif c:match("%W") then
-					print(" - Found nonalphanum, leaving param type")
+					dprint(" - Found nonalphanum, leaving param type")
 					state = STATE_READY
 					finishParam()
 					sub.pattern = sub.pattern .. escape(c)
@@ -145,10 +145,10 @@ function ChatCmdBuilder.build(func)
 				end
 			end
 		end
-		print(" - End of route")
+		dprint(" - End of route")
 		finishParam()
 		sub.pattern = sub.pattern .. "$"
-		print("Pattern: " .. sub.pattern)
+		dprint("Pattern: " .. sub.pattern)
 
 		table.insert(self._subs, sub)
 	end
@@ -191,7 +191,7 @@ function ChatCmdBuilder.build(func)
 				end
 			end
 		end
-		print("No matches")
+		return false, "Invalid command"
 	end
 
 	return cmd
@@ -262,7 +262,7 @@ local function run_tests()
 	if checknegint("checker","checknegint -2") ~= -2 then
 		error("Test 12 failed")
 	end
-	
+
 	local checknegnumber = ChatCmdBuilder.build(function(cmd)
 		cmd:sub("checknegnumber :x:number", function(name, x)
 			return x
@@ -271,7 +271,7 @@ local function run_tests()
 	if checknegnumber("checker","checknegnumber -3.3") ~= -3.3 then
 		error("Test 13 failed")
 	end
-	
+
 	local checknegpos = ChatCmdBuilder.build(function(cmd)
 		cmd:sub("checknegpos :pos:pos", function(name, pos)
 			return pos
@@ -281,20 +281,20 @@ local function run_tests()
 	if negpos.x ~= -13.3 or negpos.y ~= -4.6 or negpos.z ~= -1234.5 then
 		error("Test 14 failed")
 	end
-	
+
 	local checktypes = ChatCmdBuilder.build(function(cmd)
 		cmd:sub("checktypes :int:int :number:number  :pos:pos :word:word  :text:text", function(name, int, number, pos, word, text)
 			return int, number, pos.x, pos.y, pos.z, word, text
 		end)
 	end).run
-	local int, number, posx, posy, posz, word, text = checktypes
+	local int, number, posx, posy, posz, word, text
 	int, number, posx, posy, posz, word, text = checktypes("checker","checktypes -1 -2.4 (-3,-5.3,6.12)  some text  to finish off with")
-	--print(int, number, posx, posy, posz, word, text)
+	--dprint(int, number, posx, posy, posz, word, text)
 	if int ~= -1 or number ~= -2.4 or posx ~= -3 or posy ~= -5.3 or posz ~= 6.12 or word ~= "some" or text ~= "text  to finish off with" then
 		error("Test 15 failed")
 	end
-	print("All tests passed")
-	
+	dprint("All tests passed")
+
 end
 if not minetest then
 	run_tests()

@@ -40,6 +40,11 @@ ChatCmdBuilder.types = {
 	number = "(%-?[%d.]+)",
 	int    = "(%-?[%d]+)",
 	word   = "([^ ]+)",
+	alpha  = "([A-Za-z]+)",
+	modname      = "([a-z0-9_]+)",
+	alphascore   = "([A-Za-z_]+)",
+	alphanumeric = "([A-Za-z0-9]+)",
+	username     = "([A-Za-z0-9-_]+)",
 }
 
 function ChatCmdBuilder.build(func)

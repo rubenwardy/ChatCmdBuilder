@@ -60,11 +60,16 @@ A route is a string. Let's look at `move :target to :pos:pos`:
 
 ## Param Types
 
-* `word` - default. Any string without spaces.
+* `word` - default. Any string without spaces
 * `number` - Any number, including decimals
 * `int` - Any integer, no decimals
 * `text` - Any string
 * `pos` - 1,2,3 or 1.1,2,3.4567 or (1,2,3) or 1.2, 2 ,3.2
+* `modname` - a mod name
+* `alpha` - upper or lower alphabetic characters (A-Za-z)
+* `alphascore` - above, but with underscores
+* `alphanumeric` - upper or lower alphabetic characters and numbers (A-Za-z0-9)
+* `username` - a valid username
 
 ## Registering new Paramtypes
 

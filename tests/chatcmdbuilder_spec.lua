@@ -6,6 +6,7 @@ _G.minetest = {
 		for key, _ in pairs(privs) do
 			list[#list + 1] = key
 		end
+		table.sort(list)
 		return table.concat(list, ", ")
 	end,
 }

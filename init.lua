@@ -1,1 +1,4 @@
-ChatCmdBuilder = dofile("chatcmdbuilder.lua")
+chatcmdbuilder = dofile("chatcmdbuilder.lua")
+
+-- Compat
+ChatCmdBuilder = chatcmdbuilder

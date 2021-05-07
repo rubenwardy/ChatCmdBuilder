@@ -17,7 +17,7 @@ As a mod developer, you can:
 2. OR include the `chatcmdbuilder.lua` file in your mod, and then `dofile` it like so:
 
    ```lua
-   local ChatCmdBuilder = dofile("chatcmdbuilder.lua")
+   local chatcmdbuilder = dofile("chatcmdbuilder.lua")
    ```
 
    It's important that you keep this as a local, to avoid conflict with the
@@ -26,16 +26,12 @@ As a mod developer, you can:
 
 ## Registering Chat Commands
 
-`ChatCmdBuilder.new(name, setup)` registers a new chat command called `name`.
-Setup is called immediately after calling `new` to initialise subcommands.
-
-You can set values in the chat command definition by using def:
-`ChatCmdBuilder.new(name, setup, def)`.
+`chatcmdbuilder.register(name, def)` registers a new chat command called `name`. It returns an object to register subcommands.
 
 Here is an example:
 
 ```lua
-local cmd = ChatCmdBuilder.new("admin", {
+local cmd = chatcmdbuilder.register("admin", {
 	description = "Admin tools",
 	privs = {
 		kick = true,
@@ -71,31 +67,64 @@ or `/admin move player1 to 0,0,0` to teleport a user.
 
 A route is a string. Let's look at `move :target to :pos:pos`:
 
-* `move` and `to` are constants. They need to be there in order to match.
-* `:target` and `:pos:pos` are parameters. They're passed to the function.
+* `move` and `to` are terminals. They need to be there in order to match.
+* `:target` and `:pos:pos` are variables. They're passed to the function.
 * The second `pos` in `:pos:pos` after `:` is the param type. `:target` has an implicit
   type of `word`.
 
-## Param Types
+### Param Types
 
-* `word` - default. Any string without spaces
-* `number` - Any number, including decimals
-* `int` - Any integer, no decimals
-* `text` - Any string
-* `pos` - 1,2,3 or 1.1,2,3.4567 or (1,2,3) or 1.2, 2 ,3.2
-* `modname` - a mod name
-* `alpha` - upper or lower alphabetic characters (A-Za-z)
-* `alphascore` - above, but with underscores
-* `alphanumeric` - upper or lower alphabetic characters and numbers (A-Za-z0-9)
-* `username` - a valid username
+* `word`: default. Any string without spaces
+* `number`: Any number, including decimals
+* `int`: Any integer, no decimals
+* `text`: Any string
+* `pos`: 1,2,3 or 1.1,2,3.4567 or (1,2,3) or 1.2, 2 ,3.2
+* `modname`: a mod name
+* `alpha`: upper or lower alphabetic characters (A-Za-z)
+* `alphascore`: above, but with underscores
+* `alphanumeric`: upper or lower alphabetic characters and numbers (A-Za-z0-9)
+* `username`: a valid username
 
-## Registering new Paramtypes
+### Registering new Param Types
 
 ```lua
-ChatCmdBuilder.types["lower"] = "([a-z])"
+-- Simple type for lowercase text
+--    eg: `:param:lower`
+chatcmdbuilder.register_type("lower", "([a-z]+)", function(pop)
+	return tonumber(pop())
+end)
+
+-- Position type
+--    eg: `:param:pos`
+chatcmdbuilder.register_type("pos", "%(? *(%-?[%d.]+) *, *(%-?[%d.]+) *, *(%-?[%d.]+) *%)?", function(pop)
+	return {
+		x = tonumber(pop()),
+		y = tonumber(pop()),
+		z = tonumber(pop())
+	}
+end)
 ```
 
-## Build chat command function
+## Reference
 
-If you don't want to register the chatcommand at this point, you can just generate
-the chat command's `func` function using `ChatCmdBuilder.build`.
+### Functions
+
+* `register(name, def)`: registers a chat command
+	* Returns a `chatcmdbuilder.Builder` instance
+	* `name`: chat command name.
+	* `def`: chat command def, can contain everything in `register_chatcommand`, except for `func`.
+* `register_type(name, pattern, converter)`: register a param type
+	* `name`: type name, used in routes
+	* `pattern`: A Lua pattern
+	* `converter(res, index)`: Optional, a function to convert text into the type
+		* `res`: array table containing results from pattern matching.
+		* `index`: start position in the table
+		* returns the result and the increment to the index.
+
+### class chatcmdbuilder.Builder
+
+This is the class returned by `chatcmdbuilder.register`.
+
+* `sub(path, func)`
+	* `path`: a route
+	* `func`: a function to call

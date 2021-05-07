@@ -49,15 +49,21 @@ cmd:sub("kill :target", function(name, target)
 	end
 end)
 
-cmd:sub("move :target to :pos:pos", function(name, target, pos)
-	local player = minetest.get_player_by_name(target)
-	if player then
-		player:setpos(pos)
-		return true, "Moved " .. target .. " to " .. minetest.pos_to_string(pos)
-	else
-		return false, "Unable to find " .. target
-	end
-end)
+cmd:sub("move :target to :pos:pos", {
+	privs = {
+		teleport = true
+	}
+
+	func = function(name, target, pos)
+		local player = minetest.get_player_by_name(target)
+		if player then
+			player:setpos(pos)
+			return true, "Moved " .. target .. " to " .. minetest.pos_to_string(pos)
+		else
+			return false, "Unable to find " .. target
+		end
+	end,
+})
 ```
 
 A player could then do `/admin kill player1` to kill player1,
@@ -126,6 +132,8 @@ end)
 
 This is the class returned by `chatcmdbuilder.register`.
 
-* `sub(path, func)`
+* `sub(path, func_or_def)`
 	* `path`: a route
-	* `func`: a function to call
+	* `func_or_def`: either a function or a def table containing:
+		* `func`: function
+		* `privs`: a list of required privs

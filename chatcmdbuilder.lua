@@ -127,18 +127,26 @@ function CmdBuilder:new()
 	return o
 end
 
-function CmdBuilder:sub(route, func)
+function CmdBuilder:sub(route, func_or_def)
 	dprint("Parsing " .. route)
 
 	if string.trim then
 		route = string.trim(route)
 	end
 
+	if type(func_or_def) == "function" then
+		func_or_def = {
+			func = func_or_def
+		}
+	end
+
 	local sub = {
 		pattern = "^",
 		params = {},
-		func = func
+		func = func_or_def.func,
+		def = func_or_def,
 	}
+
 
 	-- End of param reached: add it to the pattern
 	local param = ""
@@ -235,6 +243,14 @@ function CmdBuilder:run(name, param)
 		local sub = self._subs[i]
 		local res = { string.match(param, sub.pattern) }
 		if #res > 0 then
+			if sub.def.privs then
+				local suc, missing_privs = minetest.check_player_privs(name, sub.def.privs)
+				if not suc then
+					return false, "Missing privs: " ..
+							minetest.privs_to_string(missing_privs)
+				end
+			end
+
 			local pointer = 1
 			local params = { name }
 			for j = 1, #sub.params do

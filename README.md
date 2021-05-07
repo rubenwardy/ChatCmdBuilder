@@ -1,10 +1,28 @@
 # ChatCmdBuilder
 
-Easily create complex chat commands with no regex.  
-Created by rubenwardy  
+Easily create complex chat commands with no pattern matching.
+
+Created by rubenwardy.\\
 License: MIT
 
-# Usage
+# API
+
+## Installing
+
+As a mod developer, you can:
+
+1. Depend on [lib_chatcmdbuilder](https://content.minetest.net/packages/rubenwardy/lib_chatcmdbuilder/)
+   mod and let the Minetest dependency system install it for you.
+
+2. OR include the `chatcmdbuilder.lua` file in your mod, and then `dofile` it like so:
+
+   ```lua
+   local ChatCmdBuilder = dofile("chatcmdbuilder.lua")
+   ```
+
+   It's important that you keep this as a local, to avoid conflict with the
+   mod version if installed.
+
 
 ## Registering Chat Commands
 
@@ -16,34 +34,34 @@ You can set values in the chat command definition by using def:
 
 Here is an example:
 
-```Lua
-ChatCmdBuilder.new("admin", function(cmd)
-	cmd:sub("kill :target", function(name, target)
-		local player = minetest.get_player_by_name(target)
-		if player then
-			player:set_hp(0)
-			return true, "Killed " .. target
-		else
-			return false, "Unable to find " .. target
-		end
-	end)
-
-	cmd:sub("move :target to :pos:pos", function(name, target, pos)
-		local player = minetest.get_player_by_name(target)
-		if player then
-			player:setpos(pos)
-			return true, "Moved " .. target .. " to " .. minetest.pos_to_string(pos)
-		else
-			return false, "Unable to find " .. target
-		end
-	end)
-end, {
+```lua
+local cmd = ChatCmdBuilder.new("admin", {
 	description = "Admin tools",
 	privs = {
 		kick = true,
 		ban = true
 	}
 })
+
+cmd:sub("kill :target", function(name, target)
+	local player = minetest.get_player_by_name(target)
+	if player then
+		player:set_hp(0)
+		return true, "Killed " .. target
+	else
+		return false, "Unable to find " .. target
+	end
+end)
+
+cmd:sub("move :target to :pos:pos", function(name, target, pos)
+	local player = minetest.get_player_by_name(target)
+	if player then
+		player:setpos(pos)
+		return true, "Moved " .. target .. " to " .. minetest.pos_to_string(pos)
+	else
+		return false, "Unable to find " .. target
+	end
+end)
 ```
 
 A player could then do `/admin kill player1` to kill player1,
@@ -80,21 +98,4 @@ ChatCmdBuilder.types["lower"] = "([a-z])"
 ## Build chat command function
 
 If you don't want to register the chatcommand at this point, you can just generate
-a function using `ChatCmdBuilder.build`.
-
-For example, this is the full definition of ChatCmdBuilder.new:
-
-```Lua
-function ChatCmdBuilder.new(name, func, def)
-	def = def or {}
-	def.func = ChatCmdBuilder.build(name, func)
-	minetest.register_chatcommand(name, def)
-end
-```
-
-## Run tests
-
-```Bash
-sudo apt-get install luajit
-luajit init.lua
-```
+the chat command's `func` function using `ChatCmdBuilder.build`.

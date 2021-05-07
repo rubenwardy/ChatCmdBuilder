@@ -116,24 +116,32 @@ end)
 
 ### Functions
 
-* `register(name, def)`: registers a chat command
+* `chatcmdbuilder.register(name, def)`: registers a chat command
 	* Returns a `chatcmdbuilder.Builder` instance
 	* `name`: chat command name.
 	* `def`: chat command def, can contain everything in `register_chatcommand`, except for `func`.
-* `register_type(name, pattern, converter)`: register a param type
+* `chatcmdbuilder.register_type(name, pattern, converter)`: register a param type
 	* `name`: type name, used in routes
 	* `pattern`: A Lua pattern
-	* `converter(res, index)`: Optional, a function to convert text into the type
-		* `res`: array table containing results from pattern matching.
-		* `index`: start position in the table
-		* returns the result and the increment to the index.
+	* `converter(pop)`: Optional, a function to convert text into the type
+		* `pop`: function to return the next matched group.
+		* returns the converted value.
 
 ### class chatcmdbuilder.Builder
 
 This is the class returned by `chatcmdbuilder.register`.
+
+Constructor:
+
+* `chatcmdbuilder.Builder:new()`: returns new instance
+
+Methods:
 
 * `sub(path, func_or_def)`
 	* `path`: a route
 	* `func_or_def`: either a function or a def table containing:
 		* `func`: function
 		* `privs`: a list of required privs
+* `run(name, params)`: Execute chat command
+	* Returns same as `func`: `boolean, message`.
+	* Doesn't check chat command privs, but will check subcommand privs.

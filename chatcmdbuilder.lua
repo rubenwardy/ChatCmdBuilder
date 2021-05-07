@@ -70,6 +70,7 @@ chatcmdbuilder.register_type("modname", "([a-z0-9_]+)")
 chatcmdbuilder.register_type("alphascore", "([A-Za-z_]+)")
 chatcmdbuilder.register_type("alphanumeric", "([A-Za-z0-9]+)")
 chatcmdbuilder.register_type("username", "([A-Za-z0-9-_]+)")
+chatcmdbuilder.register_type("itemname", "([a-z0-9_]+:?[a-z0-9_]+)")
 
 -- Compat
 function chatcmdbuilder.new(name, func, def)

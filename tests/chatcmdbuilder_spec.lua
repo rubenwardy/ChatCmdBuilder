@@ -21,7 +21,6 @@ describe("build", function()
 		assert(cmd:run("singleplayer", "bar abc and def"), "Test 1 failed")
 	end)
 
-
 	it("pos", function()
 		local move = ChatCmdBuilder.build(function(cmd)
 			cmd:sub("move :target to :pos:pos", function(name, target, pos)
@@ -93,5 +92,18 @@ describe("build", function()
 				word ~= "some" or text ~= "text  to finish off with" then
 			error("Test 15 failed")
 		end
+	end)
+
+	it("itemname", function()
+		local cmd = ChatCmdBuilder.build(function(cmd)
+			cmd:sub("echo :two:itemname", function(_, ...)
+				return ...
+			end)
+		end)
+
+		assert.equal("one:two", cmd:run("singleplayer", "echo one:two"))
+		assert.equal("one", cmd:run("singleplayer", "echo one"))
+		assert.is_false(cmd:run("singleplayer", "echo one:"))
+		assert.is_false(cmd:run("singleplayer", "echo :two"))
 	end)
 end)

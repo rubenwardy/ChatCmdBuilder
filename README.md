@@ -83,7 +83,8 @@ A route is a string. Let's look at `move :target to :pos:pos`:
 * `alpha`: upper or lower alphabetic characters (A-Za-z)
 * `alphascore`: above, but with underscores
 * `alphanumeric`: upper or lower alphabetic characters and numbers (A-Za-z0-9)
-* `username`: a valid username
+* `username`: a username
+* `itemname`: an item name
 
 ### Registering new Param Types
 

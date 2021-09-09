@@ -52,7 +52,7 @@ end)
 cmd:sub("move :target to :pos:pos", {
 	privs = {
 		teleport = true
-	}
+	},
 
 	func = function(name, target, pos)
 		local player = minetest.get_player_by_name(target)

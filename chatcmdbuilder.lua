@@ -29,7 +29,7 @@ function chatcmdbuilder.register(name, def)
 	def = def or {}
 	cmd.def = def
 	def.func = function(...)
-		cmd:run(...)
+		return cmd:run(...)
 	end
 	minetest.register_chatcommand(name, def)
 
